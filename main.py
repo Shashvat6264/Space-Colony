@@ -91,6 +91,7 @@ class Player(pygame.sprite.Sprite):
         self.shoot_delay = 250
         self.last_shot = pygame.time.get_ticks()
         self.image.set_colorkey(BLACK)
+        self.life = 100
 
     def update(self):
         self.speedx = 0
@@ -402,7 +403,22 @@ while running:
     all_sprites.update()
     hits = pygame.sprite.spritecollide(player,mobs,True)
     for hit in hits:
-        game_over = True
+        expl = Explosion(hit.rect.center)
+        all_sprites.add(expl)
+        player.life -= 15
+        m = Mob()
+        mobs.add(m)
+        all_sprites.add(m)
+        if m.colist_ind == 0:
+            rmobs.add(m)
+        elif m.colist_ind == 1:
+            gmobs.add(m)
+        elif m.colist_ind == 2:
+            bmobs.add(m)
+        elif m.colist_ind == 3:
+            wmobs.add(m)
+        if player.life < 0:
+            game_over = True
     for bullet in bullets:
         res = bullet.mobcollide(mobs,rmobs,gmobs,bmobs,wmobs)
         if res==1 :
