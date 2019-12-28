@@ -9,9 +9,9 @@ Space Colony is an adventure Pygame.
 ## Usage
 
 Open a terminal and use the command
-'''bash
+```bash
 python main.py
-'''
+```
 
 ## Rules:
 
