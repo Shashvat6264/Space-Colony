@@ -60,6 +60,16 @@ blue_mob = pygame.transform.scale(pygame.image.load(os.path.join(mob_folder, "bl
 green_mob = pygame.transform.scale(pygame.image.load(os.path.join(mob_folder, "green.png")).convert(),(35,35))
 white_mob = pygame.transform.scale(pygame.image.load(os.path.join(mob_folder, "white.png")).convert(),(35,35))
 
+# Explosion Graphics
+expl_folder = os.path.join(img_folder,"explosion")
+explosion_anim = []
+for i in range(0,10):
+    filename = 'E000{}.png'.format(i)
+    img = pygame.image.load(path.join(expl_folder, filename)).convert()
+    img.set_colorkey(BLACK)
+    img_final = pygame.transform.scale(img, (55,55))
+    explosion_anim.append(img_final)
+
 # Player Sprite
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -188,15 +198,23 @@ class Bullet(pygame.sprite.Sprite):
                     bmobs.add(m)
                 elif m.colist_ind == 3:
                     wmobs.add(m)
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 0
             for hit in ghits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in bhits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in whits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
         elif self.colist_ind == 1:
@@ -212,15 +230,23 @@ class Bullet(pygame.sprite.Sprite):
                     bmobs.add(m)
                 elif m.colist_ind == 3:
                     wmobs.add(m)
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 0
             for hit in rhits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in bhits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in whits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
 
@@ -237,15 +263,23 @@ class Bullet(pygame.sprite.Sprite):
                     bmobs.add(m)
                 elif m.colist_ind == 3:
                     wmobs.add(m)
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 0
             for hit in ghits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in rhits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in whits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
         elif self.colist_ind == 3:
@@ -261,17 +295,48 @@ class Bullet(pygame.sprite.Sprite):
                     bmobs.add(m)
                 elif m.colist_ind == 3:
                     wmobs.add(m)
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 0
             for hit in ghits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in bhits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
             for hit in rhits:
+                expl = Explosion(self.rect.center)
+                all_sprites.add(expl)
                 self.kill()
                 return 1
+
+# Explosion Sprite
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = explosion_anim[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 50
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.frame_rate:
+            self.frame += 1
+            if self.frame == len(explosion_anim):
+                self.kill()
+            else: 
+                center = self.rect.center
+                self.image = explosion_anim[self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
 
 # Initilize all elements
 all_sprites = pygame.sprite.Group()
