@@ -19,7 +19,7 @@ WHITE = (255,255,255)
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
-pygame.display.set_caption("WOW")
+pygame.display.set_caption("Space Colony")
 clock = pygame.time.Clock()
 
 game_folder = os.path.dirname(__file__)
@@ -136,7 +136,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100,-40)
         self.speedy = random.randrange(3,8)
-        self.speedx = random.randrange(-1,3)
+        self.speedx = random.randrange(-3,3)
         self.colist_ind = random.randrange(0,4)
         if self.colist_ind == 0:
             self.image = red_mob
@@ -151,11 +151,7 @@ class Mob(pygame.sprite.Sprite):
     def update(self):
         self.rect.y += self.speedy
         self.rect.x += self.speedx
-        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 25:
-            self.rect.x = random.randrange(WIDTH - self.rect.width)
-            self.rect.y = random.randrange(-100,-40)
-            self.speedy = random.randrange(1,8)
-
+        
 # Bullet Sprite
 class Bullet(pygame.sprite.Sprite):
     def __init__(self,x,y,color):
@@ -348,11 +344,30 @@ bmobs = pygame.sprite.Group()
 wmobs = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
+def get_high_score():
+    high_score = 0
+    try:
+        high_score_file = open("high_score.txt","r")
+        high_score = int(high_score_file.read())
+        high_score_file.close()
+    except:
+        print("Error")
+    return high_score
+
+def save_high_score(new_high_score):
+    try:
+        high_score_file = open("high_score.txt","w")
+        high_score_file.write(str(new_high_score))
+        high_score_file.close()
+    except:
+        print("Error")
 
 def show_go_screen():
     screen.fill(BLACK)
+    high_score = get_high_score()
     draw_text(screen, "Welcome to Space Colony", 25, WIDTH/2, (HEIGHT/2)-30)
     draw_text(screen, "Press Space to Continue", 18, WIDTH/2, HEIGHT/2)
+    draw_text(screen,"High Score: " + str(high_score), 18, WIDTH/2, HEIGHT/2 + 30)
     loop = True
     pygame.display.flip()
     while loop:
@@ -367,6 +382,7 @@ def show_go_screen():
 game_over = True
 running = True
 while running:
+    high_score = get_high_score()
     if game_over:
         show_go_screen()
         game_over = False
@@ -392,6 +408,8 @@ while running:
         player = Player()
         all_sprites.add(player)
         score = 0
+        diflvl = 0
+        lvl = 1
 
     clock.tick(FPS)
     #Process Input
@@ -403,9 +421,9 @@ while running:
     all_sprites.update()
     hits = pygame.sprite.spritecollide(player,mobs,True)
     for hit in hits:
-        expl = Explosion(hit.rect.center)
+        player.life -= 20
+        expl = Explosion(player.rect.center)
         all_sprites.add(expl)
-        player.life -= 15
         m = Mob()
         mobs.add(m)
         all_sprites.add(m)
@@ -417,19 +435,59 @@ while running:
             bmobs.add(m)
         elif m.colist_ind == 3:
             wmobs.add(m)
-        if player.life < 0:
+        if player.life <= 0:
             game_over = True
+            if score > high_score:
+                save_high_score(score)
     for bullet in bullets:
         res = bullet.mobcollide(mobs,rmobs,gmobs,bmobs,wmobs)
         if res==1 :
             game_over = True
+            if score > high_score:
+                save_high_score(score)
         elif res==0 :
             score += 1
+            diflvl += 1
+    for mi in mobs:
+        if mi.rect.top > HEIGHT + 10 or mi.rect.left < -25 or mi.rect.right > WIDTH + 25:
+            mi.kill()
+            m = Mob()
+            mobs.add(m)
+            all_sprites.add(m)
+            if m.colist_ind == 0:
+                rmobs.add(m)
+            elif m.colist_ind == 1:
+                gmobs.add(m)
+            elif m.colist_ind == 2:
+                bmobs.add(m)
+            elif m.colist_ind == 3:
+                wmobs.add(m)
+
+
+            
+    
+    if diflvl >= 5:
+        diflvl -= 5
+        lvl += 1
+        m = Mob()
+        mobs.add(m)
+        all_sprites.add(m)
+        if m.colist_ind == 0:
+            rmobs.add(m)
+        elif m.colist_ind == 1:
+            gmobs.add(m)
+        elif m.colist_ind == 2:
+            bmobs.add(m)
+        elif m.colist_ind == 3:
+            wmobs.add(m)
+
     
     #Draw
     screen.fill(BLACK)
     screen.blit(background,background_rect)
+    draw_text(screen, "Level: " + str(lvl), 18, 32, 9)
     draw_text(screen, "Score: " + str(score), 18, WIDTH/2 , 10)
+    draw_text(screen,"Life: "+ str(player.life), 18, WIDTH - 35, 9)
     all_sprites.draw(screen)
     pygame.display.flip()
 
