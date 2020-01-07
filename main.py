@@ -24,6 +24,7 @@ clock = pygame.time.Clock()
 
 game_folder = os.path.dirname(__file__)
 img_folder = os.path.join(game_folder,"img")
+snd_folder = os.path.join(game_folder,"snd")
 
 font_name = pygame.font.match_font('arial')
 def draw_text(surf, text, size, x, y):
@@ -69,6 +70,12 @@ for i in range(0,10):
     img.set_colorkey(BLACK)
     img_final = pygame.transform.scale(img, (55,55))
     explosion_anim.append(img_final)
+
+# Loading Sounds
+pygame.mixer.music.load(path.join(snd_folder,"Hypnotic Puzzle.wav"))
+pygame.mixer.music.set_volume(0.4)
+pygame.mixer.music.play(-1)
+shoot_sound = pygame.mixer.Sound(path.join(snd_folder,"laser3.wav"))
 
 # Player Sprite
 class Player(pygame.sprite.Sprite):
